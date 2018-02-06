@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	EnableDebug          = true
+	EnableDebug          = false
 	OpAdd                = "add"
 	OpRun                = "run"
 	OpDelete             = "delete"
@@ -121,7 +121,6 @@ func addScript(args []string) error {
 	if fullPath == "" {
 		return newErrorWithText("Invalid bash script path: " + bashPath)
 	}
-	//Debug(fullPath)
 	Put(key, filepath.ToSlash(fullPath))
 	return nil
 }
@@ -152,7 +151,6 @@ func runScript(args []string) error {
 
 			}
 		}
-		Debug(argsNew)
 		cmd = exec.Command("java", argsNew...)
 		break
 	default:
@@ -168,23 +166,17 @@ func runScript(args []string) error {
 
 func deleteScript(args []string) {
 	key := args[0]
-	//if Get(key) != "" {
-	//	flag := false
-	//	prompt := &survey.Confirm{
-	//		Message: "Do you want to delete this key?",
-	//	}
-	//	survey.AskOne(prompt, &flag, nil)
-	//	if !flag {
-	//		return
-	//	}
-	//}
-
+	if Get(key) != "" {
+		flag := false
+		prompt := &survey.Confirm{
+			Message: "Do you want to delete this key?",
+		}
+		survey.AskOne(prompt, &flag, nil)
+		if !flag {
+			return
+		}
+	}
 	Delete(key)
-	//fullPath := filepath.Join(config.StorePath, key)
-	//err := os.RemoveAll(fullPath)
-	//if err != nil {
-	//	return newError(err)
-	//}
 }
 func handleArgs(op string, args []string) error {
 
@@ -209,72 +201,18 @@ func handleArgs(op string, args []string) error {
 
 		addScript(args)
 		return nil
-		//key := args[0]
-		//if FileExists(path.Join(config.StorePath, key)) {
-		//	flag := false
-		//	prompt := &survey.Confirm{
-		//		Message: "Do you want to override the exists key?",
-		//	}
-		//	survey.AskOne(prompt, &flag, nil)
-		//	if !flag {
-		//		return nil
-		//	}
-		//
-		//}
-		//filePath := args[1]
-		//res := checkPath(filePath)
-		//if res == -1 {
-		//	return newErrorWithText("Invalid template path: " + filePath)
-		//}
-		//
-		//if res == 0 {
-		//	err = moveFile(filePath, path.Join(config.StorePath, key), false)
-		//} else {
-		//	err = moveFile(filePath, path.Join(config.StorePath, key), true)
-		//}
-		//return newError(err)
 	case OpRun:
 		if len(args) < 1 {
 			return newErrorWithText("Valid format: run [key] [params...]")
 		}
 		err := runScript(args)
 		return err
-		//key := args[0]
-		//srcPath := path.Join(config.StorePath, key)
-		//res := checkPath(srcPath)
-		//if res != 1 {
-		//	return newErrorWithText("Invalid key: " + key)
-		//}
-		//currentPath, err := CurrentRunPath()
-		//if err != nil {
-		//	return newError(err)
-		//}
-		//err = CopyDir(srcPath, currentPath)
-		//return newError(err)
 	case OpDelete:
 		if len(args) != 1 {
 			return newErrorWithText("Valid format: delete [key]")
 		}
 		deleteScript(args)
 		return nil
-		//key := args[0]
-		//if FileExists(path.Join(config.StorePath, key)) {
-		//	flag := false
-		//	prompt := &survey.Confirm{
-		//		Message: "Do you want to delete this key?",
-		//	}
-		//	survey.AskOne(prompt, &flag, nil)
-		//	if !flag {
-		//		return nil
-		//	}
-		//
-		//}
-		//fullPath := filepath.Join(config.StorePath, key)
-		//err := os.RemoveAll(fullPath)
-		//if err != nil {
-		//	return newError(err)
-		//}
-		//break
 	case OpConfig:
 		if len(args) == 0 {
 			printConfig(config)
@@ -315,13 +253,6 @@ func handleArgs(op string, args []string) error {
 		keys := IterateKey(prefix)
 		text := strings.Join(keys, "\n")
 		fmt.Println(text)
-		//fileList, err := GetFileWithPrefix(config.StorePath, prefix, ignoreFileSet)
-		//if err != nil {
-		//	return newError(err)
-		//}
-		//text := strings.Join(fileList, "\n")
-		//fmt.Println(text)
-
 	case OpPush:
 		push(config.StorePath)
 		break
