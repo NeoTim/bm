@@ -78,7 +78,7 @@ func printConfig(config Config) {
 	typeOfT := s.Type()
 	for i := 0; i < s.NumField(); i++ {
 		f := s.Field(i)
-		fmt.Printf("%s: %s", typeOfT.Field(i).Name, f.Interface())
+		fmt.Printf("%s: %s\n", typeOfT.Field(i).Name, f.Interface())
 	}
 }
 
@@ -135,6 +135,7 @@ func runScript(args []string) error {
 	args[0] = val
 
 	ext := filepath.Ext(val)
+	dir := filepath.Dir(val)
 	var cmd *exec.Cmd
 	switch ext {
 	case ".py":
@@ -157,6 +158,7 @@ func runScript(args []string) error {
 		cmd = exec.Command("bash", args...)
 	}
 
+	cmd.Dir = dir
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Run()
@@ -189,9 +191,12 @@ func handleArgs(op string, args []string) error {
 		return newError(err)
 	}
 
-	OpenDB(config)
-	InitDBBucket()
-	defer CloseDB()
+	if op != OpConfig {
+		InitDBFile(config)
+		OpenDB(config)
+		InitDBBucket()
+		defer CloseDB()
+	}
 
 	switch op {
 	case OpAdd:

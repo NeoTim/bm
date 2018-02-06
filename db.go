@@ -3,7 +3,9 @@ package main
 import (
 	"bytes"
 	"github.com/boltdb/bolt"
+	"io/ioutil"
 	"log"
+	"os"
 	"path"
 )
 
@@ -13,6 +15,23 @@ const (
 	DefaultDBName = "bm.db"
 	DefaultBucket = "bm"
 )
+
+// InitDBFile creates DB if it doesn't exist.
+func InitDBFile(config Config) {
+	if !FileExists(config.StorePath) {
+		err := os.MkdirAll(config.StorePath, 0755)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	if !FileExists(path.Join(config.StorePath, DefaultDBName)) {
+		err := ioutil.WriteFile(path.Join(config.StorePath, DefaultDBName), []byte(""), 0755)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+}
 
 // OpenDB opens the database.
 func OpenDB(config Config) {
@@ -31,7 +50,7 @@ func CloseDB() {
 	}
 }
 
-// InitDBBucket creates the bucket if it doesn't exit.
+// InitDBBucket creates the bucket if it doesn't exist.
 func InitDBBucket() {
 	db.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists([]byte(DefaultBucket))
