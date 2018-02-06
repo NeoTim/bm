@@ -16,10 +16,10 @@ go get github.com/zhangjikai/bm
 * `ls,l [prefix]` - List the keys that begin with prefix.
 * `config,c  [type] [value]` - Set configurations of bm. The valid configuration is "DBPath".
 * `push` - Call git push command based on the db storage directory.
-    - In order to make `push` and `pull` work properly, you need to specify a git repository as the storage directory of templates. For example:
-            ```
-            cd <dir>
-            git clone git@xxx.xxx/db.git
-            tpl config DBPath <dir>/db
-            ```
+    - In order to make `push` and `pull` work properly, you need to specify a git repository as the db storage directory. For example:
+    ```
+    cd <dir>
+    git clone git@xxx.xxx/db.git
+    bm config DBPath <dir>/db
+    ```
 * `pull` - Call git pull command based on the db storage directory.
